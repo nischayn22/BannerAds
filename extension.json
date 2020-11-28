@@ -1,0 +1,67 @@
+{
+	"name": "BannerAds",
+	"version": "0.0.0",
+	"author": [
+		"Nischayn22",
+		"WikiWorks"
+	],
+	"url": "https://www.mediawiki.org/wiki/Extension:BannerAds",
+	"license-name": "MIT",
+	"type": "other",
+	"AutoloadClasses": {
+		"BannerAdsHooks": "BannerAdsHooks.php",
+		"SpecialBannerAds": "SpecialBannerAds.php",
+		"BannerAds": "BannerAds.php",
+		"BannerAdsApi": "BannerAdsApi.php",
+		"TrackClicksApi": "TrackClicksApi.php"
+	},
+	"APIModules": {
+		"banner_ads": "BannerAdsApi",
+		"track_clicks": "TrackClicksApi"
+	},
+	"SpecialPages": {
+		"BannerAds": "SpecialBannerAds"
+	},
+	"Hooks": {
+		"SiteNoticeAfter": [
+			"BannerAdsHooks::onSiteNoticeAfter"
+		],
+		"LoadExtensionSchemaUpdates": [
+			"BannerAdsHooks::onLoadExtensionSchemaUpdate"
+		],
+		"RecordClick": [
+			"BannerAdsHooks::onRecordClick"
+		]
+	},
+	"ResourceModules": {
+		"ext.banner_ads.main": {
+			"scripts": [
+				"resources/banner_ads.js"
+			],
+			"styles": [
+				"resources/banner_ads.css"
+			]
+		},
+		"ext.bootstrap": {
+			"scripts": [
+				"resources/bootstrap.min.js"
+			],
+			"styles": [
+				"resources/bootstrap.min.css"
+			]
+		},
+		"ext.jquery_confirm": {
+			"scripts": [
+				"resources/jquery-confirm.min.js"
+			],
+			"styles": [
+				"resources/jquery-confirm.min.css"
+			]
+		}
+	},
+	"ResourceFileModulePaths": {
+		"localBasePath": "",
+		"remoteExtPath": "BannerAds"
+	},
+	"manifest_version": 1
+}
