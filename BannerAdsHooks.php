@@ -3,6 +3,49 @@
 class BannerAdsHooks {
 
 	public static function onRecordClick( $params ) {
+		if ( $params['track_app'] == "banner_ads" ) {
+			$dbr = wfGetDB( DB_SLAVE );
+			$dbw = wfGetDB( DB_MASTER );
+			$row = $dbr->selectRow(
+				"ba_ad_stats",
+				"*",
+				[ 
+					"camp_id" => $params['camp_id'],
+					"ad_id" => $params['ad_id'],
+					"page_id" => $params['page_id']
+				],
+				__METHOD__
+			);
+			if ( !$row ) {
+				$dbw->insert(
+					'ba_ad_stats',
+					[ 
+						"camp_id" => $params['camp_id'],
+						"ad_id" => $params['ad_id'],
+						"page_id" => $params['page_id'],
+						"counter" => 1
+					],
+					__METHOD__,
+					array( 'IGNORE' )
+				);
+				$dbw->commit();
+			} else {
+				$dbw->update(
+					'ba_ad_stats',
+					[ 
+						"counter" => $row->counter + 1
+					],
+					[ 'id' => $row->id ],
+					__METHOD__,
+					array( 'IGNORE' )
+				);
+				$dbw->commit();
+			}
+		}
+	}
+
+	public static function onBeforePageDisplay( OutputPage $out, Skin $skin ) {
+		$out->addModuleStyles( 'ext.banner_ads.main' );
 	}
 
 	/**
@@ -13,17 +56,17 @@ class BannerAdsHooks {
 	public static function onSiteNoticeAfter( &$siteNotice, Skin $skin ) {
 		global $wgScriptPath;
 
-		$campaign_id = 1;
-		$ad_id = 1;
-		$external_url = "";
+		$ad_data = BannerAdsProcessor::getMobileAd();
 
-		$siteNotice = '
-			<div>
-				<a href="'. $wgScriptPath .'/api.php?action=track_clicks&track_app=banner_ads&campaign_id='. $campaign_id .'&ad_id='. $ad_id .'&external_url='. $external_url .'">
-					<img src="https://tpc.googlesyndication.com/simgad/6306868953523201331" border="0" width="970" height="90" alt="" class="img_ad">
-				</a>
-			</div>
-		';
+		if ( !empty( $ad_data ) ) {
+			$siteNotice = '
+				<div class="ba_mobile_ad">
+					<a href="'. $wgScriptPath .'/api.php?action=track_clicks&track_app=banner_ads&camp_id='. $ad_data[0] .'&ad_id='. $ad_data[1] .'&page_id='. $ad_data[4] .'&external_url='. $ad_data[3] .'">
+						<img src="'. $ad_data[2] .'" border="0" width="970" height="90" alt="" class="img_ad">
+					</a>
+				</div>
+			';
+		}
 	}
 
 	function onLoadExtensionSchemaUpdate( $updater ) {

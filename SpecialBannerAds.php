@@ -23,6 +23,7 @@ class SpecialBannerAds extends SpecialPage {
 	  <li role="presentation" class="nav-item"><a class="nav-link active" aria-controls="campaigns" role="tab" href="#campaigns" data-toggle="tabs">Campaigns</a></li>
 	  <li role="presentation" class="nav-item"><a class="nav-link" aria-controls="ad_sets" role="tab" href="#ad_sets" data-toggle="tabs">Ad Sets</a></li>
 	  <li role="presentation" class="nav-item"><a class="nav-link" aria-controls="ads" role="tab" href="#ads" data-toggle="tabs">Ads</a></li>
+	  <li role="presentation" class="nav-item"><a class="nav-link" aria-controls="ad_target" role="tab" href="#ad_target" data-toggle="tabs">Ad Targeting</a></li>
 	  <li role="presentation" class="nav-item"><a class="nav-link" aria-controls="stats" role="tab" href="#stats" data-toggle="tabs">Stats</a></li>
 	</ul>
 	<div class="tab-content card panel-default">
@@ -38,6 +39,10 @@ class SpecialBannerAds extends SpecialPage {
 			<button type="button" class="btn btn-primary" id="create_ad">Create Ad</button>
 			<div id="ads_list" style="margin-top:10px;"></div>
 		</div>
+		<div role="tabpanel" class="tab-pane card-body" id="ad_target">
+			<button type="button" class="btn btn-primary" id="add_target">Ad New Target</button>
+			<div id="ad_target_list" style="margin-top:10px;"></div>
+		</div>
 		<div role="tabpanel" class="tab-pane card-body" id="stats">
 			<div id="stats_list" style="margin-top:10px;"></div>
 		</div>
@@ -48,6 +53,6 @@ class SpecialBannerAds extends SpecialPage {
 		$this->getOutput()->addHTML( $html );
 		$this->getOutput()->addModules( 'ext.bootstrap' );
 		$this->getOutput()->addModules( 'ext.jquery_confirm' );
-		$this->getOutput()->addModules( 'ext.banner_ads.main' );
+		$this->getOutput()->addModules( 'ext.banner_ads.special' );
 	}
 }

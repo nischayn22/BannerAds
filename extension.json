@@ -13,7 +13,8 @@
 		"SpecialBannerAds": "SpecialBannerAds.php",
 		"BannerAds": "BannerAds.php",
 		"BannerAdsApi": "BannerAdsApi.php",
-		"TrackClicksApi": "TrackClicksApi.php"
+		"TrackClicksApi": "TrackClicksApi.php",
+		"BannerAdsProcessor": "BannerAdsProcessor.php"
 	},
 	"APIModules": {
 		"banner_ads": "BannerAdsApi",
@@ -26,6 +27,9 @@
 		"SiteNoticeAfter": [
 			"BannerAdsHooks::onSiteNoticeAfter"
 		],
+		"BeforePageDisplay": [
+			"BannerAdsHooks::onBeforePageDisplay"
+		],
 		"LoadExtensionSchemaUpdates": [
 			"BannerAdsHooks::onLoadExtensionSchemaUpdate"
 		],
@@ -34,10 +38,15 @@
 		]
 	},
 	"ResourceModules": {
-		"ext.banner_ads.main": {
+		"ext.banner_ads.special": {
 			"scripts": [
 				"resources/banner_ads.js"
 			],
+			"dependencies": [
+				"jquery.tablesorter"
+			]
+		},
+		"ext.banner_ads.main": {
 			"styles": [
 				"resources/banner_ads.css"
 			]

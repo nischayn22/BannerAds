@@ -23,8 +23,8 @@ CREATE INDEX /*i*/ba_adset_index ON /*_*/ba_adset (id);
 
 CREATE TABLE /*_*/ba_ad (
   `id` int unsigned NOT NULL PRIMARY KEY AUTO_INCREMENT,
-  `name` varchar(50),
   `adset_id` int(10),
+  `name` varchar(50),
   `ad_type` int(1),
   `ad_img_url` varchar(250),
   `ad_url` varchar(250)
