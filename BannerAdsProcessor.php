@@ -22,8 +22,8 @@ class BannerAdsProcessor {
 
 		// TODO: Filter by this page
 		$campaigns = $dbr->select(
-			["ba_campaign", "ba_campaign_pages" ],
-			"*",
+			[ "ba_campaign", "ba_campaign_pages" ],
+			[ "ba_campaign.id", "ba_campaign.adset_id" ],
 			[ "end_date > " . $ts_now, "page_id" => $page_id ],
 			__METHOD__,
 			array(),

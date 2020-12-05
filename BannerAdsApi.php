@@ -1,5 +1,7 @@
 <?php
 
+use MediaWiki\MediaWikiServices;
+
 class BannerAdsApi extends ApiBase {
 
 	public function addResultValues($code, $value) {
@@ -9,9 +11,10 @@ class BannerAdsApi extends ApiBase {
 		} else if ($code == 'failed' && array_key_exists('failed', $this->getResult()->getData()['result'])) {
 			return;
 		} else if ( is_array($value) ) {
-			$warnings = (array) $this->getResult()->getData()['result'][$code];
-			$warnings = array_merge( $warnings, $value );
-			$result->addValue( 'result', $code, $warnings, ApiResult::OVERRIDE);
+			// $warnings = (array) $this->getResult()->getResultData()['result'][$code];
+			// $warnings = array_merge( $warnings, $value );
+			// dieq( $value, $this->getResult()->getResultData() );
+			$result->addValue( 'result', $code, $value, ApiResult::OVERRIDE);
 		} else {
 			$result->addValue( 'result', $code, $value);
 		}
@@ -33,17 +36,61 @@ class BannerAdsApi extends ApiBase {
 
 		if ( $this->getMain()->getVal('ba_action') == "fetch_ad_display" ) {
 			$this->fetchAdDisplay();
+		} else if ( $this->getMain()->getVal('ba_action') == "fetch_stats_display" ) {
+			$this->getStatsDisplay();
+		} else if ( $this->getMain()->getVal('ba_action') == "get_campaigns" ) {
+			$this->getCampaignList();
+		} else if ( $this->getMain()->getVal('ba_action') == "get_adsets" ) {
+			$this->getAdsetIds();
+		} else if ( $this->getMain()->getVal('ba_action') == "delete_camp" ) {
+			$this->deleteCampaign();
 		} else if ( $this->getMain()->getVal('ba_action') == "create_camp" ) {
 			$this->createCampaign();
 		} else if ( $this->getMain()->getVal('ba_action') == "create_adset" ) {
 			$this->createAdSet();
 		} else if ( $this->getMain()->getVal('ba_action') == "create_ad" ) {
 			$this->createAd();
+		} else if ( $this->getMain()->getVal('ba_action') == "delete_ad" ) {
+			$this->deleteAd();
 		} else if ( $this->getMain()->getVal('ba_action') == "add_target" ) {
 			$this->addTarget();
+		} else if ( $this->getMain()->getVal('ba_action') == "delete_target" ) {
+			$this->deleteTarget();
 		}
 	}
 
+	/**
+	 * Get BannerAds's custom upload directory (within $wgUploadDirectory).
+	 * @return string Full filesystem path with no trailing slash.
+	 */
+	protected function getUploadDir() {
+		$uploadDirectory = MediaWikiServices::getInstance()
+			->getMainConfig()
+			->get( 'UploadDirectory' );
+		$uploadDir = $uploadDirectory . '/BannerAds';
+		if ( !is_dir( $uploadDir ) ) {
+			mkdir( $uploadDir );
+		}
+		$uploadDirFull = rtrim( realpath( $uploadDir ), DIRECTORY_SEPARATOR );
+		if ( !is_dir( $uploadDirFull ) ) {
+			throw new Exception( "Unable to create directory: $uploadDir" );
+		}
+		return $uploadDirFull;
+	}
+
+	public function deleteTarget() {
+		$dbw = wfGetDB( DB_MASTER );
+		$dbw->delete(
+			'ba_campaign_pages',
+			[ 
+				"id" => $this->getMain()->getVal( "target_id" ),
+			],
+			__METHOD__,
+			array( 'IGNORE' )
+		);
+		$dbw->commit();
+		$this->getResult()->addValue( "result", "success", "Success!" );
+	}
 
 	public function addTarget() {
 		$title = Title::newFromText( $this->getMain()->getVal( "title" ) );
@@ -67,21 +114,53 @@ class BannerAdsApi extends ApiBase {
 		$this->getResult()->addValue( "result", "success", "Success!" );
 	}
 
-	public function createAd() {
+	public function deleteAd() {
 		$dbw = wfGetDB( DB_MASTER );
-		$dbw->insert(
+		$dbw->delete(
 			'ba_ad',
 			[ 
-				"name" => $this->getMain()->getVal( "name" ),
-				"adset_id" => $this->getMain()->getVal( "adset_id" ),
-				"ad_type" => $this->getMain()->getVal( "ad_type" ),
-				"ad_img_url" => $this->getMain()->getVal( "ad_img_url" ),
-				"ad_url" => $this->getMain()->getVal( "ad_url" )
+				"id" => $this->getMain()->getVal( "ad_id" ),
 			],
 			__METHOD__,
 			array( 'IGNORE' )
 		);
 		$dbw->commit();
+		$this->getResult()->addValue( "result", "success", "Success!" );
+	}
+
+	public function createAd() {
+		global $wgServer, $wgScriptPath;
+
+		$uploadDir = $this->getUploadDir();
+		$fileTmpPath = $_FILES['ad_img']['tmp_name'];
+		$fileName = $_FILES['ad_img']['name'];
+		$fileSize = $_FILES['ad_img']['size'];
+		$fileType = $_FILES['ad_img']['type'];
+		$fileNameCmps = explode(".", $fileName);
+		$fileExtension = strtolower(end($fileNameCmps));
+		$newFileName = md5(time() . $fileName) . '.' . $fileExtension;
+		$dest_path = $uploadDir . "/" . $newFileName;
+
+ 		if( move_uploaded_file( $fileTmpPath, $dest_path ) ) {
+
+			$dbw = wfGetDB( DB_MASTER );
+			$dbw->insert(
+				'ba_ad',
+				[ 
+					"name" => $this->getMain()->getVal( "name" ),
+					"adset_id" => $this->getMain()->getVal( "adset_id" ),
+					"ad_type" => $this->getMain()->getVal( "ad_type" ),
+					"ad_img_url" => $wgServer . $wgScriptPath . '/images/BannerAds/' . basename( $dest_path ),
+					"ad_url" => $this->getMain()->getVal( "ad_url" )
+				],
+				__METHOD__,
+				array( 'IGNORE' )
+			);
+			$dbw->commit();
+		} else {
+			$this->getResult()->addValue( "result", "failed", "Could not upload file" );
+			return;
+		}
 		$this->getResult()->addValue( "result", "success", "Success!" );
 	}
 
@@ -99,20 +178,130 @@ class BannerAdsApi extends ApiBase {
 		$this->getResult()->addValue( "result", "success", "Success!" );
 	}
 
-	public function createCampaign() {
+	public function deleteCampaign() {
 		$dbw = wfGetDB( DB_MASTER );
-		$dbw->insert(
+		$dbw->delete(
 			'ba_campaign',
 			[ 
-				"name" => $this->getMain()->getVal( "name" ),
-				"adset_id" => $this->getMain()->getVal( "adset_id" ),
-				"end_date" => DateTime::createFromFormat("d M y", $this->getMain()->getVal( "end_date" ) )->getTimestamp()
+				"id" => $this->getMain()->getVal( "camp_id" ),
 			],
 			__METHOD__,
 			array( 'IGNORE' )
 		);
 		$dbw->commit();
 		$this->getResult()->addValue( "result", "success", "Success!" );
+	}
+
+	public function createCampaign() {
+		$dbw = wfGetDB( DB_MASTER );
+
+		$end_date = $this->getMain()->getVal( "end_date" );
+		if ( empty( $end_date ) ) {
+			$end_ts = (new DateTime())->modify( '+365 days' )->getTimestamp();
+		} else {
+			$end_ts = DateTime::createFromFormat("d M y", $end_date )->getTimestamp();
+		}
+
+		$dbw->insert(
+			'ba_campaign',
+			[ 
+				"name" => $this->getMain()->getVal( "name" ),
+				"end_date" => $end_ts
+			],
+			__METHOD__,
+			array( 'IGNORE' )
+		);
+		$dbw->commit();
+		$adset_id = $dbw->insertId();
+		$dbw->insert(
+			'ba_adset',
+			[ 
+				'id' => $adset_id,
+				"name" => $this->getMain()->getVal( "name" ),
+			],
+			__METHOD__,
+			array( 'IGNORE' )
+		);
+		$dbw->update(
+			'ba_campaign',
+			[ 'adset_id' => $adset_id ],
+			[ 'id' => $adset_id ],
+			__METHOD__,
+			array( 'IGNORE' )
+		);
+		$dbw->commit();
+		$this->getResult()->addValue( "result", "success", "Success!" );
+	}
+
+	public function getAdsetIds() {
+		$dbr = wfGetDB( DB_SLAVE );
+		$adsets = $dbr->select(
+			"ba_adset",
+			"*",
+			"true",
+			__METHOD__
+		);
+		$results = [];
+		foreach( $adsets as $adset ) {
+			$results[$adset->id] = $adset->name;
+		}
+		$this->addResultValues( "adsets", $results );
+		$this->getResult()->addValue( "result", "success", "success" );
+	}
+
+	public function getCampaignList() {
+		$dbr = wfGetDB( DB_SLAVE );
+		$campaigns = $dbr->select(
+			"ba_campaign",
+			"*",
+			"true",
+			__METHOD__
+		);
+		$results = [];
+		foreach( $campaigns as $campaign ) {
+			$results[$campaign->id] = $campaign->name;
+		}
+		$this->addResultValues( "campaigns", $results );
+		$this->getResult()->addValue( "result", "success", "success" );
+	}
+
+	public function getStatsDisplay() {
+		$dbr = wfGetDB( DB_SLAVE );
+		$stats = $dbr->select(
+			"ba_ad_stats",
+			"*",
+			[ 'camp_id' => $this->getMain()->getVal( 'camp_id' ) ],
+			__METHOD__
+		);
+
+		$stats_html = '
+			<table class="wikitable sortable">
+				<tr>
+					<th>Campaign ID</th>
+					<th>Ad ID</th>
+					<th>Page</th>
+					<th>Counter</th>
+				</tr>
+		';
+
+		foreach( $stats as $stat ) {
+			$wikipage = WikiPage::newFromID( $stat->page_id );
+			if ( empty( $wikipage ) ) {
+				continue;
+			}
+			$stats_html .= "
+				<tr>
+					<td>". $stat->camp_id ."</td>
+					<td>". $stat->ad_id ."</td>
+					<td>". $wikipage->getTitle()->getText() ."</td>
+					<td>". $stat->counter ."</td>
+				</tr>
+			";
+		}
+
+		$targeting_html .= "</table>";
+		$this->addResultValues( "stats_html", $stats_html );
+		$this->getResult()->addValue( "result", "success", "success" );
 	}
 
 	public function fetchAdDisplay() {
@@ -130,17 +319,19 @@ class BannerAdsApi extends ApiBase {
 					<th>Campaign ID</th>
 					<th>Campaign Name</th>
 					<th>End Date</th>
+					<th>Action</th>
 				</tr>
 		';
 
 		foreach( $campaigns as $campaign ) {
-			$campaign_html .= "
+			$campaign_html .= '
 				<tr>
-					<td>". $campaign->id ."</td>
-					<td>". $campaign->name ."</td>
-					<td>". (new DateTime())->setTimestamp( $campaign->end_date )->format("d M y") ."</td>
+					<td>'. $campaign->id .'</td>
+					<td>'. $campaign->name .'</td>
+					<td>'. (new DateTime())->setTimestamp( $campaign->end_date )->format("d M y") .'</td>
+					<td><button type="button" class="btn btn-danger api_action" data-camp_id="'. $campaign->id .'" data-ba_action="delete_camp" data-action="banner_ads" data-format="json">Delete</button></td>
 				</tr>
-			";
+			';
 		}
 
 		$campaign_html .= "</table>";
@@ -183,26 +374,28 @@ class BannerAdsApi extends ApiBase {
 		$ads_html = '
 			<table class="wikitable">
 				<tr>
-					<th>Ad ID</th>
 					<th>AdSet ID</th>
+					<th>Ad ID</th>
 					<th>Ad Name</th>
 					<th>Ad Type</th>
 					<th>Ad Img</th>
 					<th>Ad URL</th>
+					<th>Action</th>
 				</tr>
 		';
 
 		foreach( $ads as $ad ) {
-			$ads_html .= "
+			$ads_html .= '
 				<tr>
-					<td>". $ad->id ."</td>
-					<td>". $ad->adset_id ."</td>
-					<td>". $ad->name ."</td>
-					<td>". BannerAdsProcessor::$ad_types[$ad->ad_type] ."</td>
-					<td>". $ad->ad_img_url ."</td>
-					<td>". $ad->ad_url ."</td>
+					<td>'. $ad->adset_id .'</td>
+					<td>'. $ad->id .'</td>
+					<td>'. $ad->name .'</td>
+					<td>'. BannerAdsProcessor::$ad_types[$ad->ad_type] .'</td>
+					<td>'. $ad->ad_img_url .'</td>
+					<td>'. $ad->ad_url .'</td>
+					<td><button type="button" class="btn btn-danger api_action" data-ad_id="'. $ad->id .'" data-ba_action="delete_ad" data-action="banner_ads" data-format="json">Delete</button></td>
 				</tr>
-			";
+			';
 		}
 
 		$ads_html .= "</table>";
@@ -220,6 +413,7 @@ class BannerAdsApi extends ApiBase {
 				<tr>
 					<th>Campaign ID</th>
 					<th>Page</th>
+					<th>Action</th>
 				</tr>
 		';
 
@@ -228,51 +422,18 @@ class BannerAdsApi extends ApiBase {
 			if ( empty( $wikipage ) ) {
 				continue;
 			}
-			$targeting_html .= "
+			$targeting_html .= '
 				<tr>
-					<td>". $targeting->camp_id ."</td>
-					<td>". $wikipage->getTitle()->getText() ."</td>
+					<td>'. $targeting->camp_id .'</td>
+					<td>'. $wikipage->getTitle()->getText() .'</td>
+					<td><button type="button" class="btn btn-danger api_action" data-target_id="'. $targeting->id .'" data-ba_action="delete_target" data-action="banner_ads" data-format="json">Delete</button></td>
 				</tr>
-			";
+			';
 		}
 
 		$targeting_html .= "</table>";
 		$this->addResultValues( "targeting_html", $targeting_html );
 
-		$stats = $dbr->select(
-			"ba_ad_stats",
-			"*",
-			"true",
-			__METHOD__
-		);
-
-		$stats_html = '
-			<table class="wikitable sortable">
-				<tr>
-					<th>Campaign ID</th>
-					<th>Ad ID</th>
-					<th>Page</th>
-					<th>Counter</th>
-				</tr>
-		';
-
-		foreach( $stats as $stat ) {
-			$wikipage = WikiPage::newFromID( $stat->page_id );
-			if ( empty( $wikipage ) ) {
-				continue;
-			}
-			$stats_html .= "
-				<tr>
-					<td>". $stat->camp_id ."</td>
-					<td>". $stat->ad_id ."</td>
-					<td>". $wikipage->getTitle()->getText() ."</td>
-					<td>". $stat->counter ."</td>
-				</tr>
-			";
-		}
-
-		$targeting_html .= "</table>";
-		$this->addResultValues( "stats_html", $stats_html );
 		$this->getResult()->addValue( "result", "success", "Refreshed!" );
 	}
 

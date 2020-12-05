@@ -46,7 +46,24 @@
 				alert( "ERROR : " + data.error.info );
 			}
 		}
+		initBind();
 	};
+
+	function initBind() {
+		$( '.api_action').unbind().on("click", function(){
+			_this = $(this);
+			$.ajax({
+			  url:wgScriptPath + '/api.php',
+			  type:"POST",
+			  data: _this.data(),
+			  success: function ( data ) {
+				success(data);
+				return false;
+			  }
+			});
+			return false;
+		});
+	}
 
 	function refreshPage() {
 		$.post(
@@ -106,7 +123,6 @@
 					'<div class="container-fluid">' +
 						'<div style="text-align:left;">' +
 							'<div>Campaign Name: <br><input type="text" name="name"></div>' +
-							'<div>AdSet ID: (Adset needs to be already created)<br><input type="text" name="adset_id"></div>' +
 							'<div>End Date: (Format 23 May 20)<br><input type="text" name="end_date"></div>' +
 						'</div>' +
 					'</div>' +
@@ -132,43 +148,103 @@
 		});
 
 		$('#create_ad').click( function() {
-			formContent = $.parseHTML( 
-				'<form id="create_ad_form">' +
-					'<input name="action" value="banner_ads" type="hidden"/>' +
-					'<input name="ba_action" value="create_ad" type="hidden"/>' +
-					'<input name="format" value="json" type="hidden"/>' +
-					'<div class="container-fluid">' +
-						'<div style="text-align:left;">' +
-							'<div>Ad Name: <br><input type="text" name="name"></div>' +
-							'<div>AdSet ID: <br><input type="text" name="adset_id"></div>' +
-							'<div>Ad Type: <select name="ad_type"><option value="0">Mobile</option></select></div>' +
-							'<div>Ad Image URL: <br><input type="text" name="ad_img_url"></div>' +
-							'<div>Ad Click URL: <br><input type="text" name="ad_url"></div>' +
+			var data = { 'action': 'banner_ads', 'ba_action': 'get_adsets', 'format': 'json' };
+			$.get(wgScriptPath + '/api.php', data, function( data ) {
+				formContent = $.parseHTML( 
+					'<form id="create_ad_form">' +
+						'<input name="action" value="banner_ads" type="hidden"/>' +
+						'<input name="ba_action" value="create_ad" type="hidden"/>' +
+						'<input name="format" value="json" type="hidden"/>' +
+						'<div class="container-fluid">' +
+							'<div style="text-align:left;">' +
+								'<div>Ad Name: <br><input type="text" name="name"></div>' +
+								'<div>Campaign: <br><select name="adset_id" id="adset_id"></select></div>' +
+								'<div>Ad Type: <select name="ad_type"><option value="0">Mobile</option></select></div>' +
+								'<div>Upload Ad Image: <br><input type="file" name="ad_img"></div>' +
+								'<div>Ad Click URL (URL should start with http:// or https://): <br><input type="text" name="ad_url"></div>' +
+							'</div>' +
 						'</div>' +
-					'</div>' +
-				'</form>'
-			);
-			showForm( "Create Ad", "create_ad_form", formContent );
+					'</form>'
+				);
+				$.each( data.result.adsets, function( k, v ) {
+					$( formContent ).find( '#adset_id' ).append( '<option value="'+ k +'">'+ v + '</option>' );
+				} );
+
+				form_id = "create_ad_form";
+				form_name = "Create Ad";
+				$.confirm({
+					theme: 'modern',
+					columnClass: 'large',
+					title: form_name,
+					content: function() {
+						content = formContent;
+						return content[0].outerHTML;
+					},
+					type: 'orange',
+					typeAnimated: true,
+					buttons: {
+						confirm: {
+							text: 'Create',
+							btnClass: 'btn-orange',
+							action: function () {
+								mw.notify( "Processing..." );
+								var formData = new FormData($( '#' + form_id )[0]);
+								$.ajax({  
+									type: "POST",  
+									url: wgScriptPath + '/api.php',
+									data: formData,
+									async: false,
+									cache: false,
+									contentType: false,
+									processData: false,
+									success: function(data) {
+										success(data);
+									}
+								});
+							}
+						},
+						cancel: function () {
+						}
+					}
+				});
+			});
 		});
 
 		$('#add_target').click( function() {
-			formContent = $.parseHTML( 
-				'<form id="add_new_target">' +
-					'<input name="action" value="banner_ads" type="hidden"/>' +
-					'<input name="ba_action" value="add_target" type="hidden"/>' +
-					'<input name="format" value="json" type="hidden"/>' +
-					'<div class="container-fluid">' +
-						'<div style="text-align:left;">' +
-							'<div>Campaign ID: <br><input type="text" name="camp_id"></div>' +
-							'<div>Page Name: <br><input type="text" name="title"></div>' +
+			var data = { 'action': 'banner_ads', 'ba_action': 'get_campaigns', 'format': 'json' };
+			$.get(wgScriptPath + '/api.php', data, function( data ){
+				formContent = $.parseHTML( 
+					'<form id="add_new_target">' +
+						'<input name="action" value="banner_ads" type="hidden"/>' +
+						'<input name="ba_action" value="add_target" type="hidden"/>' +
+						'<input name="format" value="json" type="hidden"/>' +
+						'<div class="container-fluid">' +
+							'<div style="text-align:left;">' +
+								'<div>Campaign: <br><select name="camp_id" id="camp_id"></select></div>' +
+								'<div>Page Name: <br><input type="text" name="title"></div>' +
+							'</div>' +
 						'</div>' +
-					'</div>' +
-				'</form>'
-			);
-			showForm( "Add Target", "add_new_target", formContent );
+					'</form>'
+				);
+				$.each( data.result.campaigns, function( k, v ) {
+					$( formContent ).find( '#camp_id' ).append( '<option value="'+ k +'">'+ v + '</option>' );
+				} );
+				showForm( "Add Target", "add_new_target", formContent );
+			});
 		});
 
 		refreshPage();
+		var data = { 'action': 'banner_ads', 'ba_action': 'get_campaigns', 'format': 'json' };
+		$.get(wgScriptPath + '/api.php', data, function( data ){
+			$.each( data.result.campaigns, function( k, v ) {
+				$( '#camp_selector' ).parent().find('ul').append( '<li><a class="show_stats" data-camp_id="'+ k +'">'+ v + '</a></li>' );
+			} );
+
+			$( '.show_stats' ).click( function() {
+				var data = { 'action': 'banner_ads', 'ba_action': 'fetch_stats_display', 'camp_id': $( this ).data( 'camp_id' ), 'format': 'json' };
+				$.get( wgScriptPath + '/api.php', data, success );
+			});
+		});
 
 	});
 

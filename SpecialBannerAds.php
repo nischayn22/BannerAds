@@ -21,7 +21,6 @@ class SpecialBannerAds extends SpecialPage {
 <div class="" style="">
 	<ul id="tabs" class="nav nav-tabs" role="tablist">
 	  <li role="presentation" class="nav-item"><a class="nav-link active" aria-controls="campaigns" role="tab" href="#campaigns" data-toggle="tabs">Campaigns</a></li>
-	  <li role="presentation" class="nav-item"><a class="nav-link" aria-controls="ad_sets" role="tab" href="#ad_sets" data-toggle="tabs">Ad Sets</a></li>
 	  <li role="presentation" class="nav-item"><a class="nav-link" aria-controls="ads" role="tab" href="#ads" data-toggle="tabs">Ads</a></li>
 	  <li role="presentation" class="nav-item"><a class="nav-link" aria-controls="ad_target" role="tab" href="#ad_target" data-toggle="tabs">Ad Targeting</a></li>
 	  <li role="presentation" class="nav-item"><a class="nav-link" aria-controls="stats" role="tab" href="#stats" data-toggle="tabs">Stats</a></li>
@@ -30,10 +29,6 @@ class SpecialBannerAds extends SpecialPage {
 		<div role="tabpanel" class="tab-pane active card-body" id="campaigns">
 			<button type="button" class="btn btn-primary" id="create_camp">Create Campaign</button>
 			<div id="camp_list" style="margin-top:10px;"></div>
-		</div>
-		<div role="tabpanel" class="tab-pane card-body" id="ad_sets">
-			<button type="button" class="btn btn-primary" id="create_adset">Create AdSet</button>
-			<div id="ad_sets_list" style="margin-top:10px;"></div>
 		</div>
 		<div role="tabpanel" class="tab-pane card-body" id="ads">
 			<button type="button" class="btn btn-primary" id="create_ad">Create Ad</button>
@@ -44,6 +39,14 @@ class SpecialBannerAds extends SpecialPage {
 			<div id="ad_target_list" style="margin-top:10px;"></div>
 		</div>
 		<div role="tabpanel" class="tab-pane card-body" id="stats">
+			<div class="dropdown btn-group">
+			  <button class="btn btn-default dropdown-toggle" type="button" id="camp_selector" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+				Select Campaign
+				<span class="caret"></span>
+			  </button>
+			  <ul class="dropdown-menu" aria-labelledby="camp_selector">
+			  </ul>
+			</div>
 			<div id="stats_list" style="margin-top:10px;"></div>
 		</div>
 	</div>

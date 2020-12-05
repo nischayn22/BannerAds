@@ -53,6 +53,7 @@
 		},
 		"ext.bootstrap": {
 			"scripts": [
+				"resources/popper.min.js",
 				"resources/bootstrap.min.js"
 			],
 			"styles": [
