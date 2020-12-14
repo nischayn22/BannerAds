@@ -56,11 +56,22 @@ class BannerAdsHooks {
 	public static function onSiteNoticeAfter( &$siteNotice, Skin $skin ) {
 		global $wgScriptPath;
 
-		$ad_data = BannerAdsProcessor::getMobileAd();
+		$ad_data = BannerAdsProcessor::getAd( BannerAdsProcessor::AD_TYPE_MOBILE_TOP );
 
 		if ( !empty( $ad_data ) ) {
 			$siteNotice = '
 				<div class="ba_mobile_ad">
+					<a href="'. $wgScriptPath .'/api.php?action=track_clicks&track_app=banner_ads&camp_id='. $ad_data[0] .'&ad_id='. $ad_data[1] .'&page_id='. $ad_data[4] .'&external_url='. $ad_data[3] .'">
+						<img src="'. $ad_data[2] .'" border="0" width="970" height="90" alt="" class="img_ad">
+					</a>
+				</div>
+			';
+		}
+		$ad_data = BannerAdsProcessor::getAd( BannerAdsProcessor::AD_TYPE_MOBILE_BOT_STICKY );
+
+		if ( !empty( $ad_data ) ) {
+			$siteNotice .= '
+				<div class="ba_mobile_ad ba_fixed_bottom">
 					<a href="'. $wgScriptPath .'/api.php?action=track_clicks&track_app=banner_ads&camp_id='. $ad_data[0] .'&ad_id='. $ad_data[1] .'&page_id='. $ad_data[4] .'&external_url='. $ad_data[3] .'">
 						<img src="'. $ad_data[2] .'" border="0" width="970" height="90" alt="" class="img_ad">
 					</a>

@@ -2,13 +2,15 @@
 
 class BannerAdsProcessor {
 
-	const AD_TYPE_MOBILE = 0;
+	const AD_TYPE_MOBILE_TOP = 0;
+	const AD_TYPE_MOBILE_BOT_STICKY = 1;
 
 	static $ad_types = [
-		self::AD_TYPE_MOBILE => "Mobile",
+		self::AD_TYPE_MOBILE_TOP => "Mobile Top",
+		self::AD_TYPE_MOBILE_BOT_STICKY => "Mobile Bottom Sticky",
 	];
 
-	public static function getMobileAd() {
+	public static function getAd( $type ) {
 		global $wgTitle;
 
 		if ( $wgTitle->getNamespace() != NS_MAIN ) {
@@ -39,7 +41,7 @@ class BannerAdsProcessor {
 			);
 
 			foreach( $ads as $ad ) {
-				if ( $ad->ad_type == self::AD_TYPE_MOBILE ) {
+				if ( $ad->ad_type == $type ) {
 					return [
 						$campaign->id,
 						$ad->id,

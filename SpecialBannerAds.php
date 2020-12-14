@@ -42,7 +42,6 @@ class SpecialBannerAds extends SpecialPage {
 			<div class="dropdown btn-group">
 			  <button class="btn btn-default dropdown-toggle" type="button" id="camp_selector" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
 				Select Campaign
-				<span class="caret"></span>
 			  </button>
 			  <ul class="dropdown-menu" aria-labelledby="camp_selector">
 			  </ul>

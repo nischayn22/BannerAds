@@ -195,6 +195,13 @@ class BannerAdsApi extends ApiBase {
 	public function createCampaign() {
 		$dbw = wfGetDB( DB_MASTER );
 
+		$start_date = $this->getMain()->getVal( "start_date" );
+		if ( empty( $start_date ) ) {
+			$start_ts = (new DateTime())->modify()->getTimestamp();
+		} else {
+			$start_ts = DateTime::createFromFormat("d M y", $start_date )->getTimestamp();
+		}
+
 		$end_date = $this->getMain()->getVal( "end_date" );
 		if ( empty( $end_date ) ) {
 			$end_ts = (new DateTime())->modify( '+365 days' )->getTimestamp();
@@ -206,6 +213,7 @@ class BannerAdsApi extends ApiBase {
 			'ba_campaign',
 			[ 
 				"name" => $this->getMain()->getVal( "name" ),
+				"start_date" => $start_ts,
 				"end_date" => $end_ts
 			],
 			__METHOD__,
@@ -318,6 +326,7 @@ class BannerAdsApi extends ApiBase {
 				<tr>
 					<th>Campaign ID</th>
 					<th>Campaign Name</th>
+					<th>Start Date</th>
 					<th>End Date</th>
 					<th>Action</th>
 				</tr>
@@ -328,6 +337,7 @@ class BannerAdsApi extends ApiBase {
 				<tr>
 					<td>'. $campaign->id .'</td>
 					<td>'. $campaign->name .'</td>
+					<td>'. (new DateTime())->setTimestamp( $campaign->start_date )->format("d M y") .'</td>
 					<td>'. (new DateTime())->setTimestamp( $campaign->end_date )->format("d M y") .'</td>
 					<td><button type="button" class="btn btn-danger api_action" data-camp_id="'. $campaign->id .'" data-ba_action="delete_camp" data-action="banner_ads" data-format="json">Delete</button></td>
 				</tr>
@@ -374,7 +384,6 @@ class BannerAdsApi extends ApiBase {
 		$ads_html = '
 			<table class="wikitable">
 				<tr>
-					<th>AdSet ID</th>
 					<th>Ad ID</th>
 					<th>Ad Name</th>
 					<th>Ad Type</th>
@@ -387,7 +396,6 @@ class BannerAdsApi extends ApiBase {
 		foreach( $ads as $ad ) {
 			$ads_html .= '
 				<tr>
-					<td>'. $ad->adset_id .'</td>
 					<td>'. $ad->id .'</td>
 					<td>'. $ad->name .'</td>
 					<td>'. BannerAdsProcessor::$ad_types[$ad->ad_type] .'</td>

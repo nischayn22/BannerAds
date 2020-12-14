@@ -15,3 +15,15 @@
          display: block;
       }
 }
+
+.ba_fixed_bottom {
+    bottom: 0;
+    margin-bottom: 0;
+    border-width: 1px 0 0;
+}
+.ba_fixed_bottom {
+    position: fixed;
+    right: 0;
+    left: 0;
+    z-index: 1030;
+}

@@ -123,6 +123,7 @@
 					'<div class="container-fluid">' +
 						'<div style="text-align:left;">' +
 							'<div>Campaign Name: <br><input type="text" name="name"></div>' +
+							'<div>Start Date: (Format 23 May 20)<br><input type="text" name="start_date"></div>' +
 							'<div>End Date: (Format 23 May 20)<br><input type="text" name="end_date"></div>' +
 						'</div>' +
 					'</div>' +
@@ -159,7 +160,7 @@
 							'<div style="text-align:left;">' +
 								'<div>Ad Name: <br><input type="text" name="name"></div>' +
 								'<div>Campaign: <br><select name="adset_id" id="adset_id"></select></div>' +
-								'<div>Ad Type: <select name="ad_type"><option value="0">Mobile</option></select></div>' +
+								'<div>Ad Type: <select name="ad_type"><option value="0">Mobile Top</option><option value="1">Mobile Bottom Sticky</option></select></div>' +
 								'<div>Upload Ad Image: <br><input type="file" name="ad_img"></div>' +
 								'<div>Ad Click URL (URL should start with http:// or https://): <br><input type="text" name="ad_url"></div>' +
 							'</div>' +
