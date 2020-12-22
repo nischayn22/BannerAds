@@ -45,7 +45,24 @@ class BannerAdsHooks {
 	}
 
 	public static function onBeforePageDisplay( OutputPage $out, Skin $skin ) {
+		global $wgScriptPath;
+
 		$out->addModuleStyles( 'ext.banner_ads.main' );
+
+		$ad_data = BannerAdsProcessor::getAd( BannerAdsProcessor::AD_TYPE_MOBILE_SPLASH );
+		if ( !empty( $ad_data ) ) {
+			$splash_data = [ 
+				'img' => $ad_data[2],
+				'url' => $wgScriptPath .'/api.php?action=track_clicks&track_app=banner_ads&camp_id='. $ad_data[0] .'&ad_id='. $ad_data[1] .'&page_id='. $ad_data[4] .'&external_url='. $ad_data[3]
+			];
+
+			$out->addScript( '
+				<script id="ba_splash_ad" type="text/json">
+					'. json_encode( $splash_data ) .'
+				</script>
+			' );
+			$out->addModules( "ext.banner_ads.splash" );
+		}
 	}
 
 	/**

@@ -4,10 +4,12 @@ class BannerAdsProcessor {
 
 	const AD_TYPE_MOBILE_TOP = 0;
 	const AD_TYPE_MOBILE_BOT_STICKY = 1;
+	const AD_TYPE_MOBILE_SPLASH = 2;
 
 	static $ad_types = [
 		self::AD_TYPE_MOBILE_TOP => "Mobile Top",
 		self::AD_TYPE_MOBILE_BOT_STICKY => "Mobile Bottom Sticky",
+		self::AD_TYPE_MOBILE_SPLASH => "Mobile Splash",
 	];
 
 	public static function getAd( $type ) {

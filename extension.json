@@ -46,6 +46,11 @@
 				"jquery.tablesorter"
 			]
 		},
+		"ext.banner_ads.splash": {
+			"scripts": [
+				"resources/splash_ad.js"
+			]
+		},
 		"ext.banner_ads.main": {
 			"styles": [
 				"resources/banner_ads.css"
