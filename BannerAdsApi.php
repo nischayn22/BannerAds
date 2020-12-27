@@ -232,14 +232,14 @@ class BannerAdsApi extends ApiBase {
 		if ( empty( $start_date ) ) {
 			$start_ts = (new DateTime())->modify()->getTimestamp();
 		} else {
-			$start_ts = DateTime::createFromFormat("d M y", $start_date )->getTimestamp();
+			$start_ts = DateTime::createFromFormat("d/m/y", $start_date )->getTimestamp();
 		}
 
 		$end_date = $this->getMain()->getVal( "end_date" );
 		if ( empty( $end_date ) ) {
 			$end_ts = (new DateTime())->modify( '+365 days' )->getTimestamp();
 		} else {
-			$end_ts = DateTime::createFromFormat("d M y", $end_date )->getTimestamp();
+			$end_ts = DateTime::createFromFormat("d/m/y", $end_date )->getTimestamp();
 		}
 
 		$camp_id = $this->getMain()->getVal( "camp_id" );
@@ -334,6 +334,7 @@ class BannerAdsApi extends ApiBase {
 			<table class="wikitable sortable">
 				<tr>
 					<th>Ad Name</th>
+					<th>Campaign Name</th>
 					<th>Page</th>
 					<th>Counter</th>
 				</tr>
@@ -350,9 +351,16 @@ class BannerAdsApi extends ApiBase {
 				[ "id" => $stat->ad_id ],
 				__METHOD__
 			);
+			$campaign = $dbr->selectRow(
+				"ba_campaign",
+				[ 'id' => $ad->adset_id ],
+				"true",
+				__METHOD__
+			);
 			$stats_html .= "
 				<tr>
 					<td>". $ad->name ."</td>
+					<td>". $campaign->name ."</td>
 					<td>". $wikipage->getTitle()->getText() ."</td>
 					<td>". $stat->counter ."</td>
 				</tr>
@@ -391,7 +399,7 @@ class BannerAdsApi extends ApiBase {
 					<td>'. $campaign->name .'</td>
 					<td>'. (new DateTime())->setTimestamp( $campaign->start_date )->format("d M y") .'</td>
 					<td>'. (new DateTime())->setTimestamp( $campaign->end_date )->format("d M y") .'</td>
-					<td><button type="button" class="btn btn-secondary camp_edit" data-id="'. $campaign->id .'" data-name="'. $campaign->name .'" data-start_date="'. (new DateTime())->setTimestamp( $campaign->start_date )->format("d M y") .'" data-end_date="'. (new DateTime())->setTimestamp( $campaign->end_date )->format("d M y") .'">Edit</button> <button type="button" class="btn btn-danger api_action" data-camp_id="'. $campaign->id .'" data-ba_action="delete_camp" data-action="banner_ads" data-format="json">Delete</button></td>
+					<td><button type="button" class="btn btn-secondary camp_edit" data-id="'. $campaign->id .'" data-name="'. $campaign->name .'" data-start_date="'. (new DateTime())->setTimestamp( $campaign->start_date )->format("d/m/y") .'" data-end_date="'. (new DateTime())->setTimestamp( $campaign->end_date )->format("d/m/y") .'">Edit</button> <button type="button" class="btn btn-danger api_action" data-camp_id="'. $campaign->id .'" data-ba_action="delete_camp" data-action="banner_ads" data-format="json">Delete</button></td>
 				</tr>
 			';
 		}
@@ -438,6 +446,7 @@ class BannerAdsApi extends ApiBase {
 				<tr>
 					<th>Ad ID</th>
 					<th>Ad Name</th>
+					<th>Campaign</th>
 					<th>Ad Type</th>
 					<th>Ad Img</th>
 					<th>Ad URL</th>
@@ -446,10 +455,17 @@ class BannerAdsApi extends ApiBase {
 		';
 
 		foreach( $ads as $ad ) {
+			$campaign = $dbr->selectRow(
+				"ba_campaign",
+				[ 'id' => $ad->adset_id ],
+				"true",
+				__METHOD__
+			);
 			$ads_html .= '
 				<tr>
 					<td>'. $ad->id .'</td>
 					<td>'. $ad->name .'</td>
+					<td>'. $campaign->name .'</td>
 					<td>'. BannerAdsProcessor::$ad_types[$ad->ad_type] .'</td>
 					<td>'. $ad->ad_img_url .'</td>
 					<td>'. $ad->ad_url .'</td>

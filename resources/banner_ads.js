@@ -150,8 +150,8 @@
 					'<div class="container-fluid">' +
 						'<div style="text-align:left;">' +
 							'<div>Campaign Name: <br><input type="text" name="name" value="'+ _this.data('name') +'"></div>' +
-							'<div>Start Date: (Format 23 May 20)<br><input type="text" name="start_date" value="'+ _this.data('start_date') +'"></div>' +
-							'<div>End Date: (Format 23 May 20)<br><input type="text" name="end_date" value="'+ _this.data('end_date') +'"></div>' +
+							'<div>Start Date: (Format 23/04/20)<br><input type="text" name="start_date" value="'+ _this.data('start_date') +'"></div>' +
+							'<div>End Date: (Format 23/04/20)<br><input type="text" name="end_date" value="'+ _this.data('end_date') +'"></div>' +
 						'</div>' +
 					'</div>' +
 				'</form>'
