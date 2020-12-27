@@ -219,8 +219,8 @@
 					'<div class="container-fluid">' +
 						'<div style="text-align:left;">' +
 							'<div>Campaign Name: <br><input type="text" name="name"></div>' +
-							'<div>Start Date: (Format 23 May 20)<br><input type="text" name="start_date"></div>' +
-							'<div>End Date: (Format 23 May 20)<br><input type="text" name="end_date"></div>' +
+							'<div>Start Date: (Format 23/04/20)<br><input type="text" name="start_date"></div>' +
+							'<div>End Date: (Format 23/04/20)<br><input type="text" name="end_date"></div>' +
 						'</div>' +
 					'</div>' +
 				'</form>'
