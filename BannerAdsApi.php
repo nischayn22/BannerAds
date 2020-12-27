@@ -353,8 +353,8 @@ class BannerAdsApi extends ApiBase {
 			);
 			$campaign = $dbr->selectRow(
 				"ba_campaign",
+				"*",
 				[ 'id' => $ad->adset_id ],
-				"true",
 				__METHOD__
 			);
 			$stats_html .= "
@@ -457,8 +457,8 @@ class BannerAdsApi extends ApiBase {
 		foreach( $ads as $ad ) {
 			$campaign = $dbr->selectRow(
 				"ba_campaign",
+				"*",
 				[ 'id' => $ad->adset_id ],
-				"true",
 				__METHOD__
 			);
 			$ads_html .= '
