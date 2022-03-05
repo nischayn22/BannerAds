@@ -221,6 +221,14 @@ class BannerAdsApi extends ApiBase {
 			__METHOD__,
 			array( 'IGNORE' )
 		);
+		$dbw->delete(
+			'ba_adset',
+			[ 
+				"id" => $this->getMain()->getVal( "camp_id" ),
+			],
+			__METHOD__,
+			array( 'IGNORE' )
+		);
 		$dbw->commit();
 		$this->getResult()->addValue( "result", "success", "Success!" );
 	}
@@ -279,6 +287,15 @@ class BannerAdsApi extends ApiBase {
 					"name" => $this->getMain()->getVal( "name" ),
 					"start_date" => $start_ts,
 					"end_date" => $end_ts
+				],
+				[ 'id' => $camp_id ],
+				__METHOD__,
+				array( 'IGNORE' )
+			);
+			$dbw->update(
+				'ba_adset',
+				[ 
+					"name" => $this->getMain()->getVal( "name" ),
 				],
 				[ 'id' => $camp_id ],
 				__METHOD__,
