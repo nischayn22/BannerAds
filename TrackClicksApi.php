@@ -5,7 +5,7 @@ class TrackClicksApi extends ApiBase {
 	public function execute() {
 		$request = $this->getMain()->getRequest();
 		$params = $request->getValues();
-		wfRunHooks( 'RecordClick', array( $params ) );
+		Hooks::run( 'RecordClick', array( $params ) );
 
 		if ( !empty( $params['external_url'] ) ) {
 			header( "Location:" . urldecode( $params['external_url'] ) );
